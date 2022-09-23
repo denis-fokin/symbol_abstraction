@@ -1,0 +1,6 @@
+
+rootProject.name = 'SymbolAbstraction'
+include 'framework'
+include 'python'
+include 'java'
+
