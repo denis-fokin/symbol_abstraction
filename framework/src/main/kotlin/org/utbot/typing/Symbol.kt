@@ -15,8 +15,8 @@ class JavaInt : PrimitiveType(Atom("int"))
 class JavaBool : PrimitiveType(Atom("bool"))
 
 open class ParameterizedType (
-    parameters: List<TypeParameter>,
-    val type: Type
+    val type: Type,
+    parameters: List<TypeParameter>
 ) : Type(parameters)
 open class DeclaredType(
     fqName: FqName,
@@ -27,20 +27,29 @@ open class FunctionType(
     val arguments: List<Type>,
     val returnValue: Type
 ) : Type(parameters)
-open class Field(
-    val name: String,
-    val type: Type
-)
+
+open class NamedFunctionType(
+    name: String,
+    parameters: List<TypeParameter>,
+    arguments: List<Type>,
+    returnValue: Type,
+) :  FunctionType(parameters, arguments, returnValue)
 
 open class Function(
     val name: String,
     val type: FunctionType
 )
 
+open class StatefulType(
+    fqName: FqName,
+    libraryType: Boolean,
+    val members: List<Type>,
+) : DeclaredType(fqName, libraryType)
+
 open class CompositeType(
     fqName: FqName,
     libraryType: Boolean,
+    fields: List<Type>,
     val supertypes: Set<Type>,
-    val fields: List<Field>,
     val methods: List<Function>,
-) : DeclaredType(fqName, libraryType)
+) : StatefulType(fqName, libraryType, fields)
