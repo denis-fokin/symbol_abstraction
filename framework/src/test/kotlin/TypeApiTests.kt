@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -38,6 +39,12 @@ class TypeApiTests {
         compositeTypeA.apply {
             members.add(function)
         }
+
+        Assertions.assertTrue(compositeTypeA.members.size == 1)
+        Assertions.assertTrue(compositeTypeA.members.first() is FunctionType)
+        val firstTypeParameter = compositeTypeB.parameters.first()
+        Assertions.assertTrue(firstTypeParameter is TypeParameter)
+        Assertions.assertEquals((firstTypeParameter as TypeParameter).constraints.first().boundary, compositeTypeA)
     }
 
     @Test
@@ -59,17 +66,7 @@ class TypeApiTests {
             members.add(this)
         }
 
-        assert(compositeType.members.contains(compositeType))
-    }
-
-    @Test
-    fun `Forgotten initialization`() {
-        val fqName = FqName(listOf("some"), "Composite")
-        val compositeType = CompositeType(fqName)
-
-        assertThrows<UninitializedPropertyAccessException> {
-            compositeType.members.contains(compositeType)
-        }
+        Assertions.assertTrue(compositeType.members.contains(compositeType))
     }
 }
 
