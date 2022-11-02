@@ -1,8 +1,58 @@
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class TypeApiTests {
+
+    fun `Test 1 from Katya set` () {
+
+        val T = TypeParameter()
+        val S = TypeParameter()
+        val compositeTypeUnion = StatefulType(FqName(listOf("typing"), "Union")).apply {
+            parameters.add(T)
+            parameters.add(S)
+        }
+        val compositeTypeSet = CompositeType(FqName(listOf("builtins"), "Set")).apply {
+            parameters.add(compositeTypeUnion)
+        }
+    }
+
+    @Test
+    fun `Union example` () {
+        //Set<Union<T, S>>)
+
+        val T = TypeParameter()
+        val S = TypeParameter()
+
+        val compositeTypeSet = CompositeType(FqName(emptyList(), "Set"))
+
+        val function = FunctionType().apply {
+            parameters.add(S)
+            arguments.add(compositeTypeSet.copyAndSubstituteParameter(T, with = S))
+        }
+
+        val compositeTypeUnion = CompositeType(FqName(emptyList(), "Union")).apply {
+            parameters.add(T)
+            parameters.add(S)
+        }
+
+        compositeTypeSet.apply {
+            parameters.add(compositeTypeUnion)
+        }
+    }
+
+    @Test
+    fun `Copy when substitute` () {
+        val T = TypeParameter()
+        val S = TypeParameter()
+
+        val compositeTypeSet = CompositeType(FqName(emptyList(), "Set")).apply {
+            parameters.add(T)
+        }
+
+        val substitutedWithS = compositeTypeSet.copyAndSubstituteParameter(T, with = S)
+
+        Assertions.assertNotEquals(compositeTypeSet.parameters, substitutedWithS.parameters)
+    }
 
     @Test
     fun `Katya circular dependency`() {

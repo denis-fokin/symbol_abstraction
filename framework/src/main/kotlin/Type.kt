@@ -12,7 +12,7 @@ open class FunctionType : Type() {
 }
 
 open class StatefulType(name: Name) : NamedType(name) {
-   val members: MutableList<Type> = mutableListOf()
+    val members: MutableList<Type> = mutableListOf()
 }
 
 open class CompositeType(name: Name) : StatefulType(name) {
