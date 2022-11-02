@@ -1,18 +1,27 @@
-open class Type protected constructor(val parameters: List<Type>)
-
-open class NamedType constructor(val name: Name, parameters: List<Type>) : Type(parameters)
-
-open class FunctionType(val arguments: List<Type>, val returnValue: Type, parameters: List<Type>) : Type(parameters)
-
-open class StatefulType(name: Name, parameters: List<Type>) : NamedType(name, parameters) {
-    lateinit var members: List<Type>
+open class Type {
+    val parameters: MutableList<Type> = mutableListOf()
 }
 
-open class CompositeType(name: Name, parameters: List<Type>) : StatefulType(name, parameters) {
-    lateinit var supertypes: Collection<Type>
+object VoidType : Type()
+
+open class NamedType(val name: Name) : Type()
+
+open class FunctionType : Type() {
+    val arguments: MutableList<Type> = mutableListOf()
+    var returnValue: Type = VoidType
 }
 
-open class TypeParameter(val constraints: Set<TypeParameterConstraint>, parameters: List<Type>) : Type(parameters)
+open class StatefulType(name: Name) : NamedType(name) {
+   val members: MutableList<Type> = mutableListOf()
+}
+
+open class CompositeType(name: Name) : StatefulType(name) {
+    val supertypes: MutableList<Type> = mutableListOf()
+}
+
+open class TypeParameter : Type() {
+    val constraints: MutableSet<TypeParameterConstraint> = mutableSetOf()
+}
 
 class TypeRelation(
     val name: String
@@ -24,5 +33,4 @@ open class TypeParameterConstraint(
 )
 
 sealed class Name
-data class Atom(val name: String) : Name()
 data class FqName(val prefix: List<String>, val name: String) : Name()

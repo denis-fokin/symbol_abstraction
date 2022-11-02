@@ -4,27 +4,68 @@ import org.junit.jupiter.api.assertThrows
 class TypeApiTests {
 
     @Test
-    fun `Dummy demonstration` () {
-        val namedType1 = NamedType(name = FqName(listOf("some"), "Thing"), parameters = emptyList())
-        val namedType2 = NamedType(name = FqName(listOf("other"), "Stuff"), parameters = emptyList())
+    fun `Katya circular dependency`() {
+        /*
+        class B<T:A>
+        interface A {
+            fun foo() : B<A>
+        }
+        */
 
-        val T = TypeParameter(emptySet(), parameters = emptyList())
-        val S = TypeParameter(emptySet(), parameters = emptyList())
+        val nameA = FqName(emptyList(), "A")
+        val compositeTypeA = CompositeType(nameA)
+
+        val nameB = FqName(emptyList(), "B")
+        val compositeTypeB = CompositeType(nameB)
+
+        val typeT = TypeParameter().apply {
+            val extendsRelation = TypeRelation("extends")
+            constraints.add(TypeParameterConstraint(extendsRelation, compositeTypeA))
+        }
+
+        compositeTypeB.apply {
+            parameters.add(typeT)
+        }
+
+        val compositeTypeB1 = CompositeType(nameB).apply {
+            parameters.add(compositeTypeA)
+        }
+
+        val function = FunctionType().apply {
+            parameters.add(compositeTypeB1)
+        }
+
+        compositeTypeA.apply {
+            members.add(function)
+        }
     }
-    @Test
-    fun `Composite type test` () {
-        val compositeType = CompositeType(FqName(listOf("some"), "Composite"), emptyList())
 
-        compositeType.refine(compositeType) {
-            this.members = listOf(this)
+    @Test
+    fun `Dummy demonstration`() {
+        val fqName = FqName(listOf("some"), "Thing")
+        val namedType1 = NamedType(fqName)
+        val fqNameStuff = FqName(listOf("other"), "Stuff")
+        val namedType2 = NamedType(fqNameStuff)
+
+        val T = TypeParameter()
+        val S = TypeParameter()
+    }
+
+    @Test
+    fun `Composite type test`() {
+        val compositeType = CompositeType(FqName(listOf("some"), "Composite"))
+
+        compositeType.apply {
+            members.add(this)
         }
 
         assert(compositeType.members.contains(compositeType))
     }
 
     @Test
-    fun `Forgotten initialization` () {
-        val compositeType = CompositeType(FqName(listOf("some"), "Composite"), emptyList())
+    fun `Forgotten initialization`() {
+        val fqName = FqName(listOf("some"), "Composite")
+        val compositeType = CompositeType(fqName)
 
         assertThrows<UninitializedPropertyAccessException> {
             compositeType.members.contains(compositeType)
