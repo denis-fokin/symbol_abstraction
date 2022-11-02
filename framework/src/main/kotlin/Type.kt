@@ -1,29 +1,15 @@
-interface Type {
-    val parameters: List<Type>
-}
+open class Type protected constructor(val parameters: List<Type>)
 
-interface NamedType: Type {
-    val name: Name
-}
+open class NamedType constructor(val name: Name, parameters: List<Type>): Type(parameters)
 
-interface FunctionType: Type {
-    val arguments: List<Type>
-    val returnValue: Type
-}
+open class FunctionType(val arguments: List<Type>, val  returnValue: Type, parameters: List<Type>): Type(parameters)
 
-interface StatefulType: NamedType {
-    val members: List<Type>
-}
+open class StatefulType(members: List<Type>, name: Name, parameters: List<Type>) : NamedType(name, parameters)
 
-interface CompositeType: StatefulType {
-    val supertypes: Collection<Type>
-}
+open class CompositeType(val  supertypes: Collection<Type>, members: List<Type>, name: Name, parameters: List<Type>)
+    : StatefulType(members, name, parameters)
 
-open class TypeParameter(
-    val constraints: Set<TypeParameterConstraint>
-): Type {
-    override val parameters: List<Type> = emptyList()
-}
+open class TypeParameter(val constraints: Set<TypeParameterConstraint>, parameters: List<Type>, ) : Type(parameters)
 
 class TypeRelation(
     val name: String
