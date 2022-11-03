@@ -15,4 +15,14 @@ fun Type.copyAndSubstituteParameter(typeParameter: TypeParameter, with: Type): T
     return copy
 }
 
+fun CompositeType.copyAndSubstituteSuperType(superType: StatefulType, with: Type): Type {
+    val copy = copy()
+    copy.supertypes.replaceAll{ if (it == superType) with else it}
+    return copy
+}
 
+fun StatefulType.copyAndSubstituteMember(memberType: CompositeType, with: Type): Type {
+    val copy = copy()
+    copy.parameters.replaceAll{ if (it == memberType) with else it}
+    return copy
+}
