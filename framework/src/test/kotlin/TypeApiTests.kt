@@ -14,7 +14,7 @@ class TypeApiTests {
         val E = TypeParameter()
         val N = TypeParameter()
 
-        val compositeTypeKUnionEN = StatefulType(FqName(listOf(""), "KUnion")).apply {
+        val statefulTypeKUnionEN = StatefulType(FqName(listOf(""), "KUnion")).apply {
             parameters.add(E)
             parameters.add(N)
         }
@@ -23,10 +23,17 @@ class TypeApiTests {
             parameters.add(E)
         }
 
-        val compositeTypeKSetSubstitutedWithUnion = compositeTypeKSet.copyAndSubstituteParameter(E, with = compositeTypeKUnionEN)
+        // Here substitution happens
+        // we avoid deep substitution
+        // but remember the path in the typeMap
+        val compositeTypeKSetSubstitutedWithUnion = compositeTypeKSet.copyAndSubstituteParameter(E, with = statefulTypeKUnionEN)
 
-        val functionTypeFoo = FunctionType(compositeTypeKSet).apply {
-            parameters.add(compositeTypeKSetSubstitutedWithUnion)
+        // Some dictionary that keep adjacent list for a given type (this is a dummy variant)
+        val typeMap = mutableMapOf<Type, Type>()
+        typeMap[compositeTypeKSetSubstitutedWithUnion] = compositeTypeKSet
+
+        val functionTypeFoo = FunctionType(returnValue = compositeTypeKSetSubstitutedWithUnion).apply {
+            parameters.add(N)
         }
 
         compositeTypeKSet.apply {
@@ -34,10 +41,40 @@ class TypeApiTests {
         }
 
         Assertions.assertTrue(compositeTypeKSet.parameters.contains(E))
-        Assertions.assertEquals(compositeTypeKSetSubstitutedWithUnion.parameters.first(), compositeTypeKUnionEN)
-        Assertions.assertEquals(compositeTypeKSet.members.first().parameters.first().parameters.first(), compositeTypeKUnionEN)
-        Assertions.assertTrue(compositeTypeKSetSubstitutedWithUnion.members.filterIsInstance<FunctionType>().first().returnValue.parameters.first() is CompositeType)
+        Assertions.assertEquals(compositeTypeKSetSubstitutedWithUnion.parameters.first(), statefulTypeKUnionEN)
+        Assertions.assertEquals(compositeTypeKSet.members.filterIsInstance<FunctionType>()
+            .first().returnValue.parameters.first(), statefulTypeKUnionEN)
 
+
+        fun <T:Type> resolveType(type:T): List<T> {
+            // dummy merge
+            // actually we can move from the furthermost predecessor and throw away
+            // every value that was removed between generations
+            val predecessorType = typeMap[type]
+
+            predecessorType?.let {
+                return listOfNotNull(type, predecessorType as T)
+            }
+
+            return listOfNotNull(type)
+        }
+
+        // Every step can be represented as an extension function for the specific type
+        // Something like compositeTypeInstance.resolveMembers()
+        val returnValues =  resolveType(compositeTypeKSetSubstitutedWithUnion)
+            // get members
+            .flatMap { it.members }
+            // resolve each
+            .flatMap { resolveType(it) }
+            // we are looking for a function
+            .filterIsInstance<FunctionType>()
+            // Resolve each return value
+            .flatMap { resolveType(it.returnValue) }
+            // in smart implementation other values are supposed to be removed according to the
+            // smart algorithm. see resolve type
+            .first()
+
+        Assertions.assertEquals(returnValues, compositeTypeKSetSubstitutedWithUnion)
     }
 
     fun `Test 1 from Katya set` () {

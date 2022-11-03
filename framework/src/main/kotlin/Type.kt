@@ -4,7 +4,6 @@ import clone.copyTypeMembers
 import clone.copyTypeParameterMembers
 
 open class Type {
-    val predecessors: MutableList<Type> = mutableListOf()
     val parameters: MutableList<Type> = mutableListOf()
 
     fun copyInto(type: Type): Type {
