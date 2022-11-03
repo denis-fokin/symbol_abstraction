@@ -3,6 +3,7 @@ import org.junit.jupiter.api.Test
 
 class TypeApiTests {
 
+    @Test
     fun `Such a situation by Katya`() {
         /*
             interface KSet <E> {
@@ -31,6 +32,11 @@ class TypeApiTests {
         compositeTypeKSet.apply {
             members.add(functionTypeFoo)
         }
+
+        Assertions.assertTrue(compositeTypeKSet.parameters.contains(E))
+        Assertions.assertEquals(compositeTypeKSetSubstitutedWithUnion.parameters.first(), compositeTypeKUnionEN)
+        Assertions.assertEquals(compositeTypeKSet.members.first().parameters.first().parameters.first(), compositeTypeKUnionEN)
+
     }
 
     fun `Test 1 from Katya set` () {
