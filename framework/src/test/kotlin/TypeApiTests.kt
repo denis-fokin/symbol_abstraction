@@ -19,7 +19,7 @@ class TypeApiTests {
             parameters.add(N)
         }
 
-        val compositeTypeKSet = StatefulType(FqName(listOf(""), "KSet")).apply {
+        val compositeTypeKSet = CompositeType(FqName(listOf(""), "KSet")).apply {
             parameters.add(E)
         }
 
@@ -36,6 +36,7 @@ class TypeApiTests {
         Assertions.assertTrue(compositeTypeKSet.parameters.contains(E))
         Assertions.assertEquals(compositeTypeKSetSubstitutedWithUnion.parameters.first(), compositeTypeKUnionEN)
         Assertions.assertEquals(compositeTypeKSet.members.first().parameters.first().parameters.first(), compositeTypeKUnionEN)
+        Assertions.assertTrue(compositeTypeKSetSubstitutedWithUnion.members.filterIsInstance<FunctionType>().first().returnValue.parameters.first() is CompositeType)
 
     }
 

@@ -1,4 +1,3 @@
-import clone.copy
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.javaField
 
@@ -9,10 +8,10 @@ fun <T : Type> T.refine(initialization: T.(t: Type) -> Unit = {}): T {
     }
 }
 
-fun Type.copyAndSubstituteParameter(typeParameter: TypeParameter, with: Type): Type {
+fun <T:Type> T.copyAndSubstituteParameter(typeParameter: TypeParameter, with: Type): T {
     val copy = copy()
     copy.parameters.replaceAll{ if (it == typeParameter) with else it}
-    return copy
+    return copy as T
 }
 
 fun CompositeType.copyAndSubstituteSuperType(superType: StatefulType, with: Type): Type {
