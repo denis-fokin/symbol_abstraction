@@ -3,6 +3,36 @@ import org.junit.jupiter.api.Test
 
 class TypeApiTests {
 
+    fun `Such a situation by Katya`() {
+        /*
+            interface KSet <E> {
+                fun <N> union(): KSet<KUnion<E, N>>
+            }
+        */
+
+        val E = TypeParameter()
+        val N = TypeParameter()
+
+        val compositeTypeKUnionEN = StatefulType(FqName(listOf(""), "KUnion")).apply {
+            parameters.add(E)
+            parameters.add(N)
+        }
+
+        val compositeTypeKSet = StatefulType(FqName(listOf(""), "KSet")).apply {
+            parameters.add(E)
+        }
+
+        val compositeTypeKSetSubstitutedWithUnion = compositeTypeKSet.copyAndSubstituteParameter(E, with = compositeTypeKUnionEN)
+
+        val functionTypeFoo = FunctionType(compositeTypeKSet).apply {
+            parameters.add(compositeTypeKSetSubstitutedWithUnion)
+        }
+
+        compositeTypeKSet.apply {
+            members.add(functionTypeFoo)
+        }
+    }
+
     fun `Test 1 from Katya set` () {
 
         val T = TypeParameter()

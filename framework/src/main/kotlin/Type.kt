@@ -6,8 +6,7 @@ object VoidType : Type()
 
 open class NamedType(val name: Name) : Type()
 
-open class FunctionType : Type() {
-    val returnValue: Type = VoidType
+open class FunctionType(val returnValue: Type = VoidType) : Type() {
     val arguments: MutableList<Type> = mutableListOf()
 }
 
